@@ -3,30 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mapeo Interactivo - LibreOffice Writer</title>
+  <title>Mapeo Interactivo con Hotspots Centrados</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <style>
-    /* VARIABLES CSS CON LAS COORDENADAS DE LAS ZONAS */
-    :root {
-      --titulo-top: 2.0%;       --titulo-left: 8.0%;       --titulo-width: 48.0%; --titulo-height: 8.0%;
-      --trabajo-top: 15.0%;     --trabajo-left: 8.0%;      --trabajo-width: 72.0%; --trabajo-height: 60.0%;
-    }
-
-    /* OCULTAR ZONAS CUANDO EL CHECKBOX NO ESTÁ MARCADO */
-    #chk-titulo:not(:checked) ~ .interfaz-wrapper .zona-titulo,
-    #chk-trabajo:not(:checked) ~ .interfaz-wrapper .zona-trabajo {
-      display: none !important;
-    }
-
-    /* ESTILO DE BOTONES ACTIVADOS */
-    #chk-titulo:checked ~ .panel-controles label[for="chk-titulo"],
-    #chk-trabajo:checked ~ .panel-controles label[for="chk-trabajo"] {
-      background-color: #247b85 !important;
-      color: #ffffff !important;
-      border-color: #247b85 !important;
-    }
-
     body {
       font-family: 'Montserrat', sans-serif;
       background-color: #f8fafc;
@@ -44,48 +24,11 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     }
 
-    h3 {
-      color: #247b85;
-      font-size: 1.2em;
-      font-weight: 700;
-      margin-top: 0;
-      margin-bottom: 14px;
-      border-bottom: 2px solid #247b85;
-      padding-bottom: 6px;
-    }
-
-    .panel-controles {
-      background: #f1f5f9;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      padding: 10px;
-      margin-bottom: 15px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      justify-content: center;
-    }
-
-    .btn-etiqueta {
-      cursor: pointer;
-      background: #ffffff;
-      border: 1px solid #cbd5e1;
-      padding: 5px 12px;
-      border-radius: 4px;
-      font-size: 0.8em;
-      font-weight: 600;
-      color: #334155;
-      user-select: none;
-      transition: all 0.15s ease-in-out;
-    }
-
-    /* CONTENEDOR CLAVE: DEBE SER INLINE-BLOCK Y RELATIVE PARA RESPETAR EL TAMAÑO DE LA IMAGEN */
+    /* CONTENEDOR PRINCIPAL QUE RIGE EL TAMAÑO DE LA IMAGEN */
     .interfaz-wrapper {
       position: relative;
       display: inline-block;
-      text-align: center;
       width: 100%;
-      max-width: 100%;
       overflow: visible;
     }
 
@@ -94,59 +37,115 @@
       height: auto;
       display: block;
       border-radius: 6px;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
 
-    /* ZONAS Y RÓTULOS */
-    .zona-overlay {
+    /* ESTILO DE LOS HOTSPOTS / PUNTOS DE INTERÉS */
+    .hotspot {
       position: absolute;
-      border-width: 2px;
-      border-style: solid;
-      border-radius: 4px;
-      pointer-events: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background-color: #ef4444; /* Color de fondo del hotspot */
+      color: #ffffff;           /* COLOR DEL SÍMBOLO O TEXTO DENTRO */
+      font-size: 12px;
+      font-weight: bold;
+      
+      /* CENTRADO PERFECTO DEL SÍMBOLO DENTRO DEL CÍRCULO */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      
+      cursor: pointer;
+      box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.3);
+      z-index: 10;
+      
+      /* AJUSTE PARA QUE EL CENTRO DEL HOTSPOT COINCIDA CON LA COORDENADA TOP/LEFT */
+      transform: translate(-50%, -50%);
+    }
+
+    /* ANIMACIÓN OPCIONAL PARA DESTACAR LOS SÍMBOLOS */
+    .hotspot::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 2px solid #ef4444;
+      animation: pulse 2s infinite;
       box-sizing: border-box;
     }
 
-    .tag-label {
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(1.8); opacity: 0; }
+    }
+
+    /* ESTILO DE LAS FICHAS DE INFORMACIÓN (TOOLTIPS / POPUPS) */
+    .hotspot .info-card {
       position: absolute;
-      padding: 2px 6px;
-      font-size: 0.7em;
-      font-weight: 700;
-      border-radius: 3px;
-      white-space: nowrap;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      bottom: 32px;            /* Distancia por encima del hotspot */
+      left: 50%;               /* Centra la ficha respecto al hotspot */
+      transform: translateX(-50%); /* CENTRADO HORIZONTAL PERFECTO */
+      
+      width: 200px;
+      background: #ffffff;
+      color: #1e293b;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e2e8f0;
+      white-space: normal;
+      text-align: left;
+      
+      /* Ocultar por defecto si es hover, o mostrar directamente */
+      display: block; 
+      pointer-events: auto;
+      z-index: 20;
+    }
+
+    /* FLECHA INFERIOR DE LA FICHA CENTRADA */
+    .hotspot .info-card::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 6px;
+      border-style: solid;
+      border-color: #ffffff transparent transparent transparent;
     }
   </style>
 </head>
 <body>
 
 <div class="widget-container">
-  <h3>🎯 Explorador Interactivo: Interfaz de LibreOffice Writer</h3>
-
-  <!-- CHECKBOXES OCULTOS -->
-  <input type="checkbox" id="chk-titulo" checked style="display:none;">
-  <input type="checkbox" id="chk-trabajo" checked style="display:none;">
-
-  <!-- BOTONES -->
-  <div class="panel-controles">
-    <label for="chk-titulo" class="btn-etiqueta">📌 Título Principal</label>
-    <label for="chk-trabajo" class="btn-etiqueta">📌 Bloque de Texto</label>
-  </div>
-
-  <!-- CONTENEDOR ESTRICTO -->
   <div class="interfaz-wrapper">
-    <!-- IMAGEN -->
-    <img src="tu_imagen.png" alt="Texto de LibreOffice Writer">
+    <!-- Tu imagen de base -->
+    <img src="tu_imagen.png" alt="Documento de interfaz">
 
-    <!-- ZONA 1 -->
-    <div class="zona-overlay zona-titulo" style="top: var(--titulo-top); left: var(--titulo-left); width: var(--titulo-width); height: var(--titulo-height); border-color: #3b82f6; background: rgba(59, 130, 246, 0.15);">
-      <span class="tag-label" style="top: -22px; left: 0px; background: #3b82f6; color: #ffffff;">Título Principal</span>
+    <!-- HOTSPOT 1 (Ejemplo de punto con símbolo '+') -->
+    <div class="hotspot" style="top: 28%; left: 30%; background-color: #ef4444;">
+      <span>+</span> <!-- Símbolo visible -->
+      
+      <!-- FICHA DE INFORMACIÓN CENTRADA -->
+      <div class="info-card">
+        <strong>Estilo de Fuente</strong><br>
+        Tamaño: 12.5 pt<br>
+        Color: #65C5E9 (Azul)
+      </div>
     </div>
 
-    <!-- ZONA 2 -->
-    <div class="zona-overlay zona-trabajo" style="top: var(--trabajo-top); left: var(--trabajo-left); width: var(--trabajo-width); height: var(--trabajo-height); border-color: #6366f1; background: rgba(99, 102, 241, 0.15);">
-      <span class="tag-label" style="top: -22px; left: 0px; background: #6366f1; color: #ffffff;">Bloque de Texto</span>
+    <!-- HOTSPOT 2 (Ejemplo de punto con número '1') -->
+    <div class="hotspot" style="top: 45%; left: 55%; background-color: #3b82f6;">
+      <span>1</span> <!-- Símbolo visible -->
+      
+      <div class="info-card">
+        <strong>Palabra Clave:</strong><br>
+        <i>robotnik</i> (Término checo tradicional).
+      </div>
     </div>
+
   </div>
 </div>
 
