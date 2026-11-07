@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mapeo Interactivo de Interfaz - LibreOffice Writer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* VARIABLES CSS CON LAS COORDENADAS DE LAS ZONAS */
+    :root {
+      --titulo-top: 0.0%;       --titulo-left: 0.0%;       --titulo-width: 100.0%; --titulo-height: 6.0%;
+      --menus-top: 6.0%;        --menus-left: 0.0%;        --menus-width: 60.0%;  --menus-height: 5.0%;
+      --herramientas-top: 11.0%; --herramientas-left: 0.0%; --herramientas-width: 100.0%; --herramientas-height: 10.0%;
+      --trabajo-top: 25.0%;     --trabajo-left: 10.0%;     --trabajo-width: 75.0%; --trabajo-height: 65.0%;
+      --lateral-top: 25.0%;     --lateral-left: 85.0%;     --lateral-width: 15.0%; --lateral-height: 65.0%;
+    }
+
+    /* OCULTAR ZONAS CUANDO EL CHECKBOX NO ESTÁ MARCADO */
+    #chk-titulo:not(:checked) ~ .interfaz-container .zona-titulo,
+    #chk-menus:not(:checked) ~ .interfaz-container .zona-menus,
+    #chk-herramientas:not(:checked) ~ .interfaz-container .zona-herramientas,
+    #chk-trabajo:not(:checked) ~ .interfaz-container .zona-trabajo,
+    #chk-lateral:not(:checked) ~ .interfaz-container .zona-lateral {
+      display: none !important;
+    }
+
+    /* ESTILO DE BOTONES ACTIVADOS */
+    #chk-titulo:checked ~ .panel-controles label[for="chk-titulo"],
+    #chk-menus:checked ~ .panel-controles label[for="chk-menus"],
+    #chk-herramientas:checked ~ .panel-controles label[for="chk-herramientas"],
+    #chk-trabajo:checked ~ .panel-controles label[for="chk-trabajo"],
+    #chk-lateral:checked ~ .panel-controles label[for="chk-lateral"] {
+      background-color: #247b85 !important;
+      color: #ffffff !important;
+      border-color: #247b85 !important;
+    }
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background-color: #f8fafc;
+      margin: 0;
+      padding: 20px;
+      color: #334155;
+    }
+
+    .widget-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    h3 {
+      color: #247b85;
+      font-size: 1.25em;
+      font-weight: 700;
+      margin-top: 0;
+      margin-bottom: 16px;
+      border-bottom: 2px solid #247b85;
+      padding-bottom: 8px;
+    }
+
+    .panel-controles {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    .btn-etiqueta {
+      cursor: pointer;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 0.85em;
+      font-weight: 600;
+      color: #334155;
+      user-select: none;
+      transition: all 0.15s ease-in-out;
+    }
+
+    .btn-etiqueta:hover {
+      border-color: #247b85;
+      color: #247b85;
+    }
+
+    .interfaz-container {
+      position: relative;
+      text-align: center;
+      margin: 0 auto;
+      overflow: visible;
+    }
+
+    .img-wrapper {
+      position: relative;
+      display: inline-block;
+      overflow: visible;
+    }
+
+    .img-wrapper img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 6px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      display: block;
+    }
+
+    /* RÓTULOS Y CAPAS FLOTANTES */
+    .zona-overlay {
+      position: absolute;
+      border-width: 2px;
+      border-style: solid;
+      border-radius: 4px;
+      pointer-events: none;
+    }
+
+    .tag-label {
+      position: absolute;
+      padding: 2px 8px;
+      font-size: 0.75em;
+      font-weight: 700;
+      border-radius: 4px;
+      white-space: nowrap;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+  </style>
+</head>
+<body>
+
+<div class="widget-container">
+  <h3>🎯 Explorador Interactivo: Interfaz de LibreOffice Writer</h3>
+
+  <!-- CHECKBOXES OCULTOS PARA CONTROL CSS SIN JS -->
+  <input type="checkbox" id="chk-titulo" checked style="display:none;">
+  <input type="checkbox" id="chk-menus" checked style="display:none;">
+  <input type="checkbox" id="chk-herramientas" checked style="display:none;">
+  <input type="checkbox" id="chk-trabajo" checked style="display:none;">
+  <input type="checkbox" id="chk-lateral" checked style="display:none;">
+
+  <!-- BOTONES DE CONTROL DE VISIBILIDAD -->
+  <div class="panel-controles">
+    <label for="chk-titulo" class="btn-etiqueta">📌 Barra de Título</label>
+    <label for="chk-menus" class="btn-etiqueta">📌 Barra de Menús</label>
+    <label for="chk-herramientas" class="btn-etiqueta">📌 Barra de Herramientas</label>
+    <label for="chk-trabajo" class="btn-etiqueta">📌 Área de Trabajo</label>
+    <label for="chk-lateral" class="btn-etiqueta">📌 Panel Lateral</label>
+  </div>
+
+  <!-- CONTENEDOR CON LA IMAGEN DE BASE Y SUS ZONAS OVERLAY -->
+  <div class="interfaz-container">
+    <div class="img-wrapper">
+      <!-- SUSTITUYE ESTA URL POR LA RUTA DE TU IMAGEN (LOCAL O EN GITHUB) -->
+      <img src="https://raw.githubusercontent.com/tu-usuario/tu-repositorio/main/writer_interface.png" alt="Interfaz de LibreOffice Writer">
+
+      <!-- CAPAS SOBREPUESTAS (ZONAS) -->
+      <div class="zona-overlay zona-titulo" style="top: var(--titulo-top); left: var(--titulo-left); width: var(--titulo-width); height: var(--titulo-height); border-color: #3b82f6; background: rgba(59, 130, 246, 0.15);">
+        <span class="tag-label" style="top: -25px; left: 0px; background: #3b82f6; color: #ffffff;">Barra de Título</span>
+      </div>
+
+      <div class="zona-overlay zona-menus" style="top: var(--menus-top); left: var(--menus-left); width: var(--menus-width); height: var(--menus-height); border-color: #10b981; background: rgba(16, 185, 129, 0.15);">
+        <span class="tag-label" style="top: -25px; left: 0px; background: #10b981; color: #ffffff;">Barra de Menús</span>
+      </div>
+
+      <div class="zona-overlay zona-herramientas" style="top: var(--herramientas-top); left: var(--herramientas-left); width: var(--herramientas-width); height: var(--herramientas-height); border-color: #f59e0b; background: rgba(245, 158, 11, 0.15);">
+        <span class="tag-label" style="top: -25px; left: 0px; background: #f59e0b; color: #ffffff;">Barra de Herramientas</span>
+      </div>
+
+      <div class="zona-overlay zona-trabajo" style="top: var(--trabajo-top); left: var(--trabajo-left); width: var(--trabajo-width); height: var(--trabajo-height); border-color: #6366f1; background: rgba(99, 102, 241, 0.15);">
+        <span class="tag-label" style="top: -25px; left: 0px; background: #6366f1; color: #ffffff;">Área de Trabajo</span>
+      </div>
+
+      <div class="zona-overlay zona-lateral" style="top: var(--lateral-top); left: var(--lateral-left); width: var(--lateral-width); height: var(--lateral-height); border-color: #ec4899; background: rgba(236, 72, 153, 0.15);">
+        <span class="tag-label" style="top: -25px; left: 0px; background: #ec4899; color: #ffffff;">Panel Lateral</span>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
